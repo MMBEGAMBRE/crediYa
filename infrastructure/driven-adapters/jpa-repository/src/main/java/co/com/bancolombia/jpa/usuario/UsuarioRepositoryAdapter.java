@@ -1,9 +1,11 @@
 package co.com.bancolombia.jpa.usuario;
 
+import co.com.bancolombia.model.exceptions.CorreoYaRegistradoException;
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,15 +18,34 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UsuarioRepositoryAdapter implements UsuarioRepository {
 
+    private static final String RESTRICCION_EMAIL_UNICO = "usuario_email_key";
+
     private final UsuarioJpaRepository repository;
 
     @Override
     @Transactional
     public Usuario guardar(Usuario usuario) {
         log.debug("Guardando usuario en base de datos");
-        UsuarioEntity guardado = repository.save(toEntity(usuario));
-        log.info("Usuario guardado con id {}", guardado.getIdUsuario());
-        return toDomain(guardado);
+        try {
+            UsuarioEntity guardado = repository.saveAndFlush(toEntity(usuario));
+            log.info("Usuario guardado con id {}", guardado.getIdUsuario());
+            return toDomain(guardado);
+        } catch (DataIntegrityViolationException ex) {
+            if (esCorreoDuplicado(ex)) {
+                log.warn("La base de datos rechazó un correo duplicado");
+                throw new CorreoYaRegistradoException(usuario.getCorreoElectronico());
+            }
+            throw ex;
+        }
+    }
+
+    /**
+     * Si dos peticiones con el mismo correo llegan casi al mismo tiempo, ambas pueden pasar
+     * la validación del caso de uso; el UNIQUE de la base detiene a la segunda.
+     */
+    private static boolean esCorreoDuplicado(DataIntegrityViolationException ex) {
+        String detalle = ex.getMostSpecificCause().getMessage();
+        return detalle != null && detalle.contains(RESTRICCION_EMAIL_UNICO);
     }
 
     @Override
