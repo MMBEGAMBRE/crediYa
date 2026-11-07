@@ -1,0 +1,38 @@
+meta {
+  name: 03 Correo duplicado en mayusculas
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "Ana María",
+    "apellidos": "Gómez Ruiz",
+    "fecha_nacimiento": "1995-04-12",
+    "direccion": "Calle 10 # 20-30",
+    "telefono": "3001234567",
+    "correo_electronico": "{{correoMayus}}",
+    "salario_base": 3500000
+  }
+}
+
+script:pre-request {
+  // El caso de uso pasa el correo a minúsculas, así que debe detectarlo como duplicado
+  const correo = bru.getVar("correoRegistrado") || "";
+  bru.setVar("correoMayus", correo.toUpperCase());
+}
+
+tests {
+  test("responde 409", function() {
+    expect(res.getStatus()).to.equal(409);
+  });
+  test("mensaje: ya está registrado", function() {
+    expect(res.getBody().mensaje).to.include("ya está registrado");
+  });
+}

@@ -1,0 +1,17 @@
+meta {
+  name: 14 Metodo no permitido (GET)
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: none
+  auth: none
+}
+
+tests {
+  test("responde 405", function() {
+    expect(res.getStatus()).to.equal(405);
+  });
+}

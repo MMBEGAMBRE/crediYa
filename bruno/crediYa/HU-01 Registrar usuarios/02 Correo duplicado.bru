@@ -1,0 +1,36 @@
+meta {
+  name: 02 Correo duplicado
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "Ana María",
+    "apellidos": "Gómez Ruiz",
+    "fecha_nacimiento": "1995-04-12",
+    "direccion": "Calle 10 # 20-30",
+    "telefono": "3001234567",
+    "correo_electronico": "{{correoRegistrado}}",
+    "salario_base": 3500000
+  }
+}
+
+script:pre-request {
+  // Usa el correo que registró "01 Registro exitoso" (ejecútalo primero)
+}
+
+tests {
+  test("responde 409", function() {
+    expect(res.getStatus()).to.equal(409);
+  });
+  test("mensaje: ya está registrado", function() {
+    expect(res.getBody().mensaje).to.include("ya está registrado");
+  });
+}

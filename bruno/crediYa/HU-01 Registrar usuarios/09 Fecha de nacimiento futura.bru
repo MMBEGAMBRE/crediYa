@@ -1,0 +1,37 @@
+meta {
+  name: 09 Fecha de nacimiento futura
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "Ana",
+    "apellidos": "Gómez",
+    "fecha_nacimiento": "2099-01-01",
+    "direccion": "Calle 10 # 20-30",
+    "telefono": "3001234567",
+    "correo_electronico": "{{correoNuevo}}",
+    "salario_base": 3500000
+  }
+}
+
+script:pre-request {
+  // Correo único en cada envío para que siempre se pueda registrar
+  bru.setVar("correoNuevo", "usuario" + Date.now() + "@crediya.com");
+}
+
+tests {
+  test("responde 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+  test("mensaje: fecha_nacimiento debe ser una fecha pasada", function() {
+    expect(res.getBody().mensaje).to.include("fecha_nacimiento debe ser una fecha pasada");
+  });
+}

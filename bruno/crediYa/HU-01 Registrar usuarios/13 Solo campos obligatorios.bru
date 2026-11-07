@@ -1,0 +1,37 @@
+meta {
+  name: 13 Solo campos obligatorios
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "Carlos",
+    "apellidos": "Ramírez",
+    "correo_electronico": "{{correoNuevo}}",
+    "salario_base": 2000000
+  }
+}
+
+script:pre-request {
+  // Correo único en cada envío para que siempre se pueda registrar
+  bru.setVar("correoNuevo", "usuario" + Date.now() + "@crediya.com");
+}
+
+tests {
+  test("responde 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  test("los campos opcionales quedan vacíos", function() {
+    const u = res.getBody();
+    expect(u.fecha_nacimiento).to.equal(null);
+    expect(u.direccion).to.equal(null);
+    expect(u.telefono).to.equal(null);
+  });
+}
