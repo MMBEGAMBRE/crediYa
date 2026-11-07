@@ -38,7 +38,8 @@ public class JpaConfig {
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             DataSource dataSource,
-            @Value("${spring.jpa.databasePlatform}") String dialect) {
+            @Value("${spring.jpa.databasePlatform}") String dialect,
+            @Value("${spring.jpa.hibernate.ddl-auto:validate}") String ddlAuto) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setPackagesToScan("co.com.bancolombia.jpa");
@@ -48,7 +49,7 @@ public class JpaConfig {
 
         Properties properties = new Properties();
         properties.setProperty("hibernate.dialect", dialect);
-        properties.setProperty("hibernate.hbm2ddl.auto", "update"); // TODO: remove this for non auto create schema
+        properties.setProperty("hibernate.hbm2ddl.auto", ddlAuto);
         em.setJpaProperties(properties);
 
         return em;
