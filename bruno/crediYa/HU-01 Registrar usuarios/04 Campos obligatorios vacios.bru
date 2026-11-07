@@ -1,0 +1,37 @@
+meta {
+  name: 04 Campos obligatorios vacios
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "",
+    "apellidos": "   ",
+    "telefono": "3001234567"
+  }
+}
+
+tests {
+  test("responde 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+  test("mensaje: nombres es obligatorio", function() {
+    expect(res.getBody().mensaje).to.include("nombres es obligatorio");
+  });
+  test("mensaje: apellidos es obligatorio", function() {
+    expect(res.getBody().mensaje).to.include("apellidos es obligatorio");
+  });
+  test("mensaje: correo_electronico es obligatorio", function() {
+    expect(res.getBody().mensaje).to.include("correo_electronico es obligatorio");
+  });
+  test("mensaje: salario_base es obligatorio", function() {
+    expect(res.getBody().mensaje).to.include("salario_base es obligatorio");
+  });
+}

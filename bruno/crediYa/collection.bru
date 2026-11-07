@@ -1,0 +1,17 @@
+meta {
+  name: crediYa
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:8080
+  correoNuevo: se-genera-al-enviar@crediya.com
+  correoRegistrado: ejecuta-primero-el-01@crediya.com
+  correoMayus: se-genera-al-enviar@crediya.com
+}
+
+docs {
+  Variables de la colección (valores por defecto):
+  - baseUrl: URL de la API. El environment "local" la sobrescribe si está seleccionado.
+  - correoNuevo / correoRegistrado / correoMayus: los scripts "Pre Request" de cada
+    request los reemplazan al enviar (las variables de runtime tienen prioridad).
+}

@@ -1,0 +1,43 @@
+meta {
+  name: 01 Registro exitoso
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "Ana María",
+    "apellidos": "Gómez Ruiz",
+    "fecha_nacimiento": "1995-04-12",
+    "direccion": "Calle 10 # 20-30",
+    "telefono": "3001234567",
+    "correo_electronico": "{{correoNuevo}}",
+    "salario_base": 3500000
+  }
+}
+
+script:pre-request {
+  // Correo único en cada envío; se guarda para usarlo en las pruebas de duplicado
+  const correo = "ana" + Date.now() + "@crediya.com";
+  bru.setVar("correoNuevo", correo);
+  bru.setVar("correoRegistrado", correo);
+}
+
+tests {
+  test("responde 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  test("devuelve el usuario con id y rol CLIENTE asignado", function() {
+    const u = res.getBody();
+    expect(u.id_usuario).to.be.a("number");
+    expect(u.id_rol).to.be.a("number");
+    expect(u.correo_electronico).to.equal(bru.getVar("correoRegistrado"));
+    expect(u.salario_base).to.equal(3500000);
+  });
+}

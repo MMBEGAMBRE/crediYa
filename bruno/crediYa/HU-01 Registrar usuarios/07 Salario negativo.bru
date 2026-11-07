@@ -1,0 +1,37 @@
+meta {
+  name: 07 Salario negativo
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "Ana",
+    "apellidos": "Gómez",
+    "fecha_nacimiento": "1995-04-12",
+    "direccion": "Calle 10 # 20-30",
+    "telefono": "3001234567",
+    "correo_electronico": "{{correoNuevo}}",
+    "salario_base": -1
+  }
+}
+
+script:pre-request {
+  // Correo único en cada envío para que siempre se pueda registrar
+  bru.setVar("correoNuevo", "usuario" + Date.now() + "@crediya.com");
+}
+
+tests {
+  test("responde 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+  test("mensaje: salario_base debe estar entre 0 y 15000000", function() {
+    expect(res.getBody().mensaje).to.include("salario_base debe estar entre 0 y 15000000");
+  });
+}
